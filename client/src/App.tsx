@@ -9,14 +9,18 @@ import Autofarm from "@/pages/Autofarm";
 import Predictions from "@/pages/Predictions";
 import Settings from "@/pages/Settings";
 import NotFound from "@/pages/not-found";
+import AuthPage from "@/pages/auth-page";
+import { ProtectedRoute } from "./lib/protected-route";
+import { AuthProvider } from "@/hooks/use-auth";
 
 function Router() {
   return (
     <Switch>
-      <Route path="/" component={Dashboard} />
-      <Route path="/autofarm" component={Autofarm} />
-      <Route path="/predictions" component={Predictions} />
-      <Route path="/settings" component={Settings} />
+      <ProtectedRoute path="/" component={Dashboard} />
+      <ProtectedRoute path="/autofarm" component={Autofarm} />
+      <ProtectedRoute path="/predictions" component={Predictions} />
+      <ProtectedRoute path="/settings" component={Settings} />
+      <Route path="/auth" component={AuthPage} />
       <Route component={NotFound} />
     </Switch>
   );
@@ -26,10 +30,12 @@ function App() {
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
-        <MainLayout>
-          <Router />
-        </MainLayout>
-        <Toaster />
+        <AuthProvider>
+          <MainLayout>
+            <Router />
+          </MainLayout>
+          <Toaster />
+        </AuthProvider>
       </TooltipProvider>
     </QueryClientProvider>
   );
