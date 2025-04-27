@@ -13,8 +13,8 @@ interface NavItemProps {
 const NavItem: React.FC<NavItemProps> = ({ icon, label, href, active }) => {
   return (
     <Link href={href}>
-      <a className={cn(
-        "flex flex-col items-center space-y-1 relative",
+      <div className={cn(
+        "flex flex-col items-center space-y-1 relative cursor-pointer",
         active ? "text-primary" : "text-white/50 hover:text-[#3CF582] transition"
       )}>
         {active && (
@@ -28,7 +28,7 @@ const NavItem: React.FC<NavItemProps> = ({ icon, label, href, active }) => {
         )}
         <i className={`${icon} text-xl`}></i>
         <span className="text-xs">{label}</span>
-      </a>
+      </div>
     </Link>
   );
 };

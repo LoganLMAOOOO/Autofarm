@@ -63,33 +63,12 @@ const Sidebar = React.forwardRef<HTMLDivElement, SidebarProps>(
               href="/predictions" 
               active={location === '/predictions'} 
             />
-            
-            <SidebarItem 
-              icon="ri-bar-chart-line" 
-              label="Analytics" 
-              href="/analytics" 
-              active={location === '/analytics'} 
-            />
-            
-            <SidebarItem 
-              icon="ri-discord-line" 
-              label="Discord Logs" 
-              href="/logs" 
-              active={location === '/logs'} 
-            />
 
             <li className="my-6 px-3">
               <p className="text-xs text-white/50 uppercase tracking-wider">
                 Configuration
               </p>
             </li>
-            
-            <SidebarItem 
-              icon="ri-user-settings-line" 
-              label="Accounts" 
-              href="/accounts" 
-              active={location === '/accounts'} 
-            />
             
             <SidebarItem 
               icon="ri-settings-4-line" 
@@ -119,15 +98,15 @@ const SidebarItem: React.FC<SidebarItemProps> = ({ icon, label, href, active }) 
   return (
     <li>
       <Link href={href}>
-        <a className={cn(
-          "flex items-center space-x-3 px-3 py-2.5 rounded-md transition-colors",
+        <div className={cn(
+          "flex items-center space-x-3 px-3 py-2.5 rounded-md transition-colors cursor-pointer",
           active 
             ? "bg-gradient-to-r from-primary/20 to-transparent text-primary" 
             : "hover:bg-white/5 text-white/70 hover:text-white"
         )}>
           <i className={`${icon} text-xl`}></i>
           <span>{label}</span>
-        </a>
+        </div>
       </Link>
     </li>
   );
