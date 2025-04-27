@@ -337,7 +337,7 @@ const Settings: React.FC = () => {
   "profit": {{profit}}
 }`}
                   />
-                  <p className="text-xs text-white/40 mt-1">Use {{variable}} syntax for dynamic values.</p>
+                  <p className="text-xs text-white/40 mt-1">Use {'{'}{'{variable}'}{'}'}  syntax for dynamic values.</p>
                 </div>
                 
                 <div className="flex gap-3">

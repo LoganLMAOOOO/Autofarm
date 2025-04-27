@@ -26,7 +26,11 @@ function validateBody<T>(schema: z.ZodType<T>) {
 // Temporary user ID for development (this would normally come from auth)
 const DEV_USER_ID = 1;
 
+import { setupAuth } from './auth';
+
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Set up authentication routes
+  setupAuth(app);
   const httpServer = createServer(app);
   
   // Initialize test user if not exists
