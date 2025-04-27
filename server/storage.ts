@@ -316,13 +316,13 @@ export class MemStorage implements IStorage {
       analytics = {
         id,
         userId,
-        date,
+        date: new Date(),
         totalPoints: 0,
         dailyPoints: 0,
         activeChannels: 0,
         winRate: "0",
         uptime: 0,
-        lastReset
+        lastReset: new Date()
       };
       this.analytics.set(id, analytics);
     }

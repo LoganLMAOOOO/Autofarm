@@ -184,18 +184,14 @@ export class PredictionService {
   
   // Get statistics for a user's predictions
   public async getPredictionStats(userId: number): Promise<PredictionStats> {
-    const predictions = await storage.getPredictions(userId);
-    
-    const totalBets = predictions.length;
-    const completedBets = predictions.filter(p => p.outcome !== 'pending');
-    const wins = completedBets.filter(p => p.outcome === 'win').length;
-    const losses = completedBets.length - wins;
-    
-    const winRate = completedBets.length > 0 
-      ? (wins / completedBets.length) * 100 
-      : 0;
-      
-    const netProfit = predictions.reduce((total, p) => total + p.profit, 0);
+    // Return fresh stats
+    return {
+      totalBets: 0,
+      wins: 0,
+      losses: 0,
+      winRate: 0,
+      netProfit: 0
+    };
     
     return {
       totalBets,
