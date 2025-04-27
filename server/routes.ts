@@ -29,6 +29,11 @@ const DEV_USER_ID = 1;
 import { setupAuth } from './auth';
 
 export async function registerRoutes(app: Express): Promise<Server> {
+  // Add health check endpoint for Render.com
+  app.get('/api/health', (req, res) => {
+    res.status(200).json({ status: 'ok' });
+  });
+  
   // Set up authentication routes
   setupAuth(app);
   const httpServer = createServer(app);
