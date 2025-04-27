@@ -1,0 +1,169 @@
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&display=swap');
+@import url('https://cdn.jsdelivr.net/npm/remixicon@3.5.0/fonts/remixicon.css');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+ 
+@layer base {
+  :root {
+    --background: 0 0% 100%;
+    --foreground: 240 10% 3.9%;
+    --card: 0 0% 100%;
+    --card-foreground: 240 10% 3.9%;
+    --popover: 0 0% 100%;
+    --popover-foreground: 240 10% 3.9%;
+    --primary: 192 100% 50%;
+    --primary-foreground: 240 5.9% 10%;
+    --secondary: 240 4.8% 95.9%;
+    --secondary-foreground: 240 5.9% 10%;
+    --muted: 240 4.8% 95.9%;
+    --muted-foreground: 240 3.8% 46.1%;
+    --accent: 240 4.8% 95.9%;
+    --accent-foreground: 240 5.9% 10%;
+    --destructive: 0 84.2% 60.2%;
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 5.9% 90%;
+    --input: 240 5.9% 90%;
+    --ring: 240 5.9% 10%;
+    --radius: 0.5rem;
+    --sidebar-background: 240 19% 16%;
+    --sidebar-foreground: 0 0% 100%;
+    --sidebar-accent: 192 100% 50%;
+    --sidebar-accent-foreground: 0 0% 100%;
+    --sidebar-border: 240 19% 25%;
+    --sidebar-primary: 192 100% 50%;
+    --sidebar-primary-foreground: 0 0% 100%;
+    --sidebar-ring: 240 19% 30%;
+  }
+ 
+  .dark {
+    /* Cyberpunk Theme Colors */
+    --background: 240 13% 7%; /* #0F0E17 */
+    --foreground: 0 0% 98%;
+    --card: 240 30% 15%; /* #1A1A2E */
+    --card-foreground: 0 0% 98%;
+    --popover: 240 17% 12%;
+    --popover-foreground: 0 0% 98%;
+    --primary: 187 100% 50%; /* #00F0FF - Neon Blue */
+    --primary-foreground: 0 0% 98%;
+    --secondary: 240 30% 15%; /* #1A1A2E */
+    --secondary-foreground: 0 0% 98%;
+    --muted: 240 10% 15%;
+    --muted-foreground: 240 5% 65%;
+    --accent: 240 10% 15%;
+    --accent-foreground: 0 0% 98%;
+    --destructive: 346 83% 59%; /* #FF2E63 - Neon Pink */
+    --destructive-foreground: 0 0% 98%;
+    --border: 240 10% 15%;
+    --input: 240 10% 15%;
+    --ring: 187 100% 50%; /* #00F0FF */
+    --sidebar-background: 240 30% 15%; /* #1A1A2E */
+    --sidebar-foreground: 0 0% 98%;
+    --sidebar-accent: 187 100% 50%; /* #00F0FF */
+    --sidebar-accent-foreground: 0 0% 98%;
+    --sidebar-border: 240 10% 20%;
+    --sidebar-primary: 187 100% 50%; /* #00F0FF */
+    --sidebar-primary-foreground: 0 0% 98%;
+    --sidebar-ring: 240 19% 30%;
+    --chart-1: 187 100% 50%; /* #00F0FF */
+    --chart-2: 152 62% 56%; /* #3CF582 - Neon Green */
+    --chart-3: 346 83% 59%; /* #FF2E63 - Neon Pink */
+    --chart-4: 276 85% 58%; /* #B537F2 - Neon Purple */
+    --chart-5: 0 0% 98%;
+  }
+}
+
+@layer base {
+  * {
+    @apply border-border;
+  }
+  
+  body {
+    @apply font-inter antialiased bg-background text-foreground;
+  }
+  
+  h1, h2, h3, h4, h5, h6 {
+    @apply font-rajdhani;
+  }
+}
+
+@layer components {
+  .glass {
+    @apply bg-card/25 backdrop-blur-sm border border-white/5;
+  }
+  
+  .neon-border {
+    position: relative;
+  }
+  
+  .neon-border::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    border: 1px solid transparent;
+    border-radius: inherit;
+    background: linear-gradient(90deg, hsl(var(--primary)), hsl(var(--chart-2)), hsl(var(--destructive)), hsl(var(--chart-4)), hsl(var(--primary))) border-box;
+    -webkit-mask: linear-gradient(#fff 0 0) padding-box, linear-gradient(#fff 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    pointer-events: none;
+  }
+  
+  .grid-background {
+    background-image: radial-gradient(rgba(0, 240, 255, 0.1) 1px, transparent 1px);
+    background-size: 30px 30px;
+  }
+  
+  /* Custom scrollbar */
+  ::-webkit-scrollbar {
+    width: 6px;
+    height: 6px;
+  }
+  
+  ::-webkit-scrollbar-track {
+    @apply bg-card/20;
+  }
+  
+  ::-webkit-scrollbar-thumb {
+    @apply bg-primary/50 rounded;
+  }
+  
+  ::-webkit-scrollbar-thumb:hover {
+    @apply bg-primary/80;
+  }
+  
+  .scanline {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 2px;
+    @apply bg-primary/10;
+    z-index: 50;
+    animation: scanline 8s linear infinite;
+    pointer-events: none;
+  }
+  
+  @keyframes scanline {
+    0% { transform: translateY(0%); }
+    100% { transform: translateY(100%); }
+  }
+  
+  @keyframes glow {
+    0% { box-shadow: 0 0 5px rgba(0, 240, 255, 0.5), 0 0 10px rgba(0, 240, 255, 0.3); }
+    100% { box-shadow: 0 0 10px rgba(0, 240, 255, 0.8), 0 0 20px rgba(0, 240, 255, 0.5), 0 0 30px rgba(0, 240, 255, 0.3); }
+  }
+  
+  @keyframes float {
+    0%, 100% { transform: translateY(0); }
+    50% { transform: translateY(-10px); }
+  }
+  
+  @keyframes dash {
+    to { stroke-dashoffset: 0; }
+  }
+}
