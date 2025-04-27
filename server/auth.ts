@@ -31,8 +31,8 @@ async function comparePasswords(supplied: string, stored: string) {
 export function setupAuth(app: Express) {
   const sessionSettings: session.SessionOptions = {
     secret: process.env.SESSION_SECRET || 'twitch-autofarm-secret-key',
-    resave: false,
-    saveUninitialized: false,
+    resave: true,
+    saveUninitialized: true,
     store: storage.sessionStore,
     cookie: {
       secure: process.env.NODE_ENV === 'production',

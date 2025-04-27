@@ -64,7 +64,7 @@ export class TwitchService {
     const farmInterval = setInterval(async () => {
       try {
         // Simulate farming points with stealth behavior
-        const randomPoints = getRandomInt(20, 50); // Random points between 20-50
+        const randomPoints = Math.floor(getRandomInt(20, 50) * (settings?.pointMultiplier || 1));
         
         // Update channel with earned points
         const updatedPoints = channel.pointsEarned + randomPoints;

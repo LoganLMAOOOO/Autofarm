@@ -14,6 +14,7 @@ interface Channel {
 
 interface ActiveChannelsProps {
   channels?: Channel[];
+  onDeleteChannel?: (channelId: string) => void; // Added for delete functionality
 }
 
 const ActiveChannels: React.FC<ActiveChannelsProps> = ({ 
@@ -23,8 +24,14 @@ const ActiveChannels: React.FC<ActiveChannelsProps> = ({
     { id: '3', name: 'shroud', duration: '6h 47m', points: 42890, status: 'Active' },
     { id: '4', name: 'Ludwig', duration: '3h 22m', points: 15423, status: 'Paused' },
     { id: '5', name: 'Amouranth', duration: '5h 51m', points: 29745, status: 'Offline' }
-  ]
+  ],
+  onDeleteChannel
 }) => {
+  const addChannel = () => {
+    // Placeholder for addChannel functionality
+    console.log("Add Channel Clicked");
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 20 }}
@@ -34,7 +41,7 @@ const ActiveChannels: React.FC<ActiveChannelsProps> = ({
       <Card className="glass rounded-lg">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-lg font-semibold">Active Channels</CardTitle>
-          <Button variant="neon" size="sm">
+          <Button variant="neon" size="sm" onClick={() => addChannel()}>
             <i className="ri-add-line mr-1"></i>
             Add Channel
           </Button>
@@ -81,8 +88,8 @@ const ActiveChannels: React.FC<ActiveChannelsProps> = ({
                       <StatusBadge status={channel.status} />
                     </td>
                     <td className="py-3 text-right">
-                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0">
-                        <i className="ri-more-2-fill text-white/40 hover:text-white"></i>
+                      <Button variant="ghost" size="sm" className="h-8 w-8 p-0" onClick={() => onDeleteChannel && onDeleteChannel(channel.id)}> {/* Added delete button */}
+                        <i className="ri-delete-bin-line text-white/40 hover:text-red-500"></i>
                       </Button>
                     </td>
                   </motion.tr>

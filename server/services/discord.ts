@@ -23,11 +23,13 @@ interface DiscordWebhookPayload {
   }>;
 }
 
+const delay = (ms: number) => new Promise(res => setTimeout(res, ms));
+
 export class DiscordService {
   private static instance: DiscordService;
   private defaultWebhookUrl: string = 'https://discord.com/api/webhooks/1366060653726404739/tDHOL9pRRmFrYXPUQCfg5Itu9mTWZsi0ROtyLEi7yn8tokyQXtzNcMBTslMClV47tD61';
   private defaultAvatarUrl: string = 'https://cdn.discordapp.com/attachments/1136593556159103026/1136593722706214942/twitch-pixel-logo.png';
-  
+
   // Singleton pattern
   public static getInstance(): DiscordService {
     if (!DiscordService.instance) {
@@ -35,39 +37,49 @@ export class DiscordService {
     }
     return DiscordService.instance;
   }
-  
+
   private constructor() {
     // Initialize service
     this.startLogProcessing();
   }
-  
+
   // Send a message to Discord webhook
   public async sendWebhook(
     webhookUrl: string, 
     payload: DiscordWebhookPayload
   ): Promise<boolean> {
-    try {
-      const response = await fetch(webhookUrl, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(payload),
-      });
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`Discord webhook error: ${response.status} ${errorText}`);
-        return false;
+    let retries = 0;
+    while (retries < 3) { // Retry up to 3 times
+      try {
+        const response = await fetch(webhookUrl, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          body: JSON.stringify(payload),
+        });
+
+        if (!response.ok) {
+          if (response.status === 429) {
+            const data = await response.json();
+            await delay(retries * 1000); // Exponential backoff
+            retries++;
+            continue;
+          }
+
+          const errorText = await response.text();
+          console.error(`Discord webhook error: ${response.status} ${errorText}`);
+          return false;
+        }
+        return true;
+      } catch (error) {
+        retries++;
+        await delay(retries * 1000); // Exponential backoff
       }
-      
-      return true;
-    } catch (error) {
-      console.error('Failed to send Discord webhook:', error);
-      return false;
     }
+    return false;
   }
-  
+
   // Send a test message to verify webhook configuration
   public async sendTestMessage(
     webhookUrl: string = this.defaultWebhookUrl, 
@@ -98,10 +110,10 @@ export class DiscordService {
         timestamp: new Date().toISOString()
       }]
     };
-    
+
     return this.sendWebhook(webhookUrl, payload);
   }
-  
+
   // Format and send activity log to Discord
   public async sendActivityLog(log: ActivityLog): Promise<boolean> {
     // Get user settings for webhook configuration
@@ -109,7 +121,7 @@ export class DiscordService {
     if (!settings || !settings.discordWebhook) {
       return false;
     }
-    
+
     // Determine if this type of log should be sent based on settings
     if (
       (log.type === 'Points Claimed' && !settings.logPoints) ||
@@ -119,7 +131,7 @@ export class DiscordService {
     ) {
       return false;
     }
-    
+
     // Determine color based on log type
     let color = 0x00F0FF; // default neon blue
     if (log.type === 'Prediction Win' || log.type.includes('Claimed')) {
@@ -131,7 +143,7 @@ export class DiscordService {
     } else if (log.type === 'System Event') {
       color = 0xB537F2; // neon purple
     }
-    
+
     // Create the payload
     const payload: DiscordWebhookPayload = {
       username: settings.webhookName || 'Twitch Farm Pro',
@@ -147,7 +159,7 @@ export class DiscordService {
         timestamp: log.timestamp.toISOString()
       }]
     };
-    
+
     // Add channel field if present
     if (log.channel) {
       payload.embeds![0].fields!.push({
@@ -156,7 +168,7 @@ export class DiscordService {
         inline: true
       });
     }
-    
+
     // Add amount field if present
     if (log.amount !== undefined && log.amount !== null) {
       payload.embeds![0].fields!.push({
@@ -165,23 +177,23 @@ export class DiscordService {
         inline: true
       });
     }
-    
+
     // Send the webhook
     const success = await this.sendWebhook(settings.discordWebhook, payload);
-    
+
     // Update log as sent if successful
     if (success) {
       await storage.markLogAsSent(log.id);
     }
-    
+
     return success;
   }
-  
+
   // Process unsent logs in background
   private async processUnsentLogs(userId: number): Promise<void> {
     try {
       const unsentLogs = await storage.getUnsentLogs(userId);
-      
+
       for (const log of unsentLogs) {
         await this.sendActivityLog(log);
         // Add a small delay to avoid rate limiting
@@ -191,7 +203,7 @@ export class DiscordService {
       console.error('Error processing unsent logs:', error);
     }
   }
-  
+
   // Start background processing of logs
   private startLogProcessing(): void {
     // Process logs every minute
@@ -199,14 +211,14 @@ export class DiscordService {
       // Process logs for the demo user (ID 1) for now
       // In a full production app, we would get all user IDs from the database
       const users = [1];
-      
+
       // Process logs for each user
       for (const userId of users) {
         await this.processUnsentLogs(userId);
       }
     }, 60000); // 1 minute
   }
-  
+
   // Format prediction data for Discord
   public async sendPredictionResult(
     userId: number,
@@ -223,7 +235,7 @@ export class DiscordService {
       channel,
       amount: profit
     };
-    
+
     const log = await storage.createLog(logData);
     return this.sendActivityLog(log);
   }
