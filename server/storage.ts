@@ -7,10 +7,11 @@ import {
 
 // Interface for all storage methods
 import session from "express-session";
+import createMemoryStore from "memorystore";
 
 export interface IStorage {
   // Session store for authentication
-  sessionStore: session.SessionStore;
+  sessionStore: session.Store;
   
   // User management
   getUser(id: number): Promise<User | undefined>;
@@ -82,7 +83,7 @@ export class MemStorage implements IStorage {
     this.analytics = new Map();
     this.sessions = new Map();
     
-    const MemoryStore = require("memorystore")(session);
+    const MemoryStore = createMemoryStore(session);
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000 // prune expired entries every 24h
     });
@@ -132,7 +133,7 @@ export class MemStorage implements IStorage {
       watchHours: 0,
       pointsEarned: 0,
       status: "Offline",
-      lastActive: undefined
+      lastActive: null
     };
     this.channels.set(id, channel);
     return channel;
@@ -224,11 +225,14 @@ export class MemStorage implements IStorage {
     const id = this.logIdCounter++;
     const timestamp = new Date();
     
+    // Ensure channel and amount are set to null if not provided
     const log: ActivityLog = {
       ...insertLog,
       id,
       timestamp,
-      sent: false
+      sent: false,
+      channel: insertLog.channel || null,
+      amount: insertLog.amount || null
     };
     
     this.logs.set(id, log);
@@ -316,14 +320,27 @@ export class MemStorage implements IStorage {
         totalPoints: 0,
         dailyPoints: 0,
         activeChannels: 0,
-        winRate: 0,
+        winRate: "0",
         uptime: 0,
         lastReset
       };
       this.analytics.set(id, analytics);
     }
     
-    const updatedAnalytics = { ...analytics, ...data };
+    // Make sure we have an analytics object with all required fields
+    const defaultAnalytics: Analytics = {
+      id: analytics.id,
+      userId: analytics.userId,
+      date: analytics.date,
+      totalPoints: analytics.totalPoints,
+      dailyPoints: analytics.dailyPoints,
+      activeChannels: analytics.activeChannels,
+      winRate: analytics.winRate,
+      uptime: analytics.uptime,
+      lastReset: analytics.lastReset
+    };
+    
+    const updatedAnalytics = { ...defaultAnalytics, ...data };
     this.analytics.set(updatedAnalytics.id, updatedAnalytics);
     return updatedAnalytics;
   }
@@ -346,7 +363,7 @@ export class MemStorage implements IStorage {
       id,
       userId,
       startTime,
-      endTime: undefined,
+      endTime: null,
       active: true
     };
     
@@ -373,246 +390,7 @@ export class MemStorage implements IStorage {
   }
 }
 
-// Export a single instance to be used throughout the application
-// Migrate to DatabaseStorage
-import { db } from './db';
-import { eq } from 'drizzle-orm';
-import session from "express-session";
-import connectPg from "connect-pg-simple";
-import { pool } from './db';
-import { 
-  users, channels, predictions, 
-  activityLogs, settings, analytics, 
-  sessions 
-} from '@shared/schema';
+// Note: We've removed the database implementation and are using MemStorage exclusively
+// to reduce costs as requested by the user
 
-const PostgresSessionStore = connectPg(session);
-
-export class DatabaseStorage implements IStorage {
-  sessionStore: session.SessionStore;
-
-  constructor() {
-    this.sessionStore = new PostgresSessionStore({ 
-      pool, 
-      createTableIfMissing: true 
-    });
-  }
-
-  async getUser(id: number): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.id, id));
-    return user;
-  }
-
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    const [user] = await db.select().from(users).where(eq(users.username, username));
-    return user;
-  }
-
-  async createUser(insertUser: InsertUser): Promise<User> {
-    const [user] = await db
-      .insert(users)
-      .values(insertUser)
-      .returning();
-    return user;
-  }
-
-  async getChannels(userId: number): Promise<Channel[]> {
-    return await db.select().from(channels).where(eq(channels.userId, userId));
-  }
-
-  async getChannel(id: number): Promise<Channel | undefined> {
-    const [channel] = await db.select().from(channels).where(eq(channels.id, id));
-    return channel;
-  }
-
-  async getChannelByName(userId: number, name: string): Promise<Channel | undefined> {
-    const [channel] = await db.select()
-      .from(channels)
-      .where(eq(channels.userId, userId) && eq(channels.name, name));
-    return channel;
-  }
-
-  async createChannel(insertChannel: InsertChannel): Promise<Channel> {
-    const [channel] = await db
-      .insert(channels)
-      .values(insertChannel)
-      .returning();
-    return channel;
-  }
-
-  async updateChannel(id: number, data: Partial<Channel>): Promise<Channel> {
-    const [updated] = await db
-      .update(channels)
-      .set(data)
-      .where(eq(channels.id, id))
-      .returning();
-    return updated;
-  }
-
-  async deleteChannel(id: number): Promise<boolean> {
-    await db.delete(channels).where(eq(channels.id, id));
-    return true;
-  }
-
-  async getActiveChannels(userId: number): Promise<Channel[]> {
-    return await db.select()
-      .from(channels)
-      .where(eq(channels.userId, userId) && eq(channels.status, "Active"));
-  }
-
-  async getPredictions(userId: number): Promise<Prediction[]> {
-    return await db.select()
-      .from(predictions)
-      .where(eq(predictions.userId, userId));
-  }
-
-  async getPredictionsByChannel(channelId: number): Promise<Prediction[]> {
-    return await db.select()
-      .from(predictions)
-      .where(eq(predictions.channelId, channelId));
-  }
-
-  async createPrediction(insertPrediction: InsertPrediction): Promise<Prediction> {
-    const [prediction] = await db
-      .insert(predictions)
-      .values(insertPrediction)
-      .returning();
-    return prediction;
-  }
-
-  async updatePrediction(id: number, data: Partial<Prediction>): Promise<Prediction> {
-    const [updated] = await db
-      .update(predictions)
-      .set(data)
-      .where(eq(predictions.id, id))
-      .returning();
-    return updated;
-  }
-
-  async getRecentPredictions(userId: number, limit: number): Promise<Prediction[]> {
-    return await db.select()
-      .from(predictions)
-      .where(eq(predictions.userId, userId))
-      .orderBy(predictions.timestamp)
-      .limit(limit);
-  }
-
-  async getLogs(userId: number): Promise<ActivityLog[]> {
-    return await db.select()
-      .from(activityLogs)
-      .where(eq(activityLogs.userId, userId));
-  }
-
-  async getRecentLogs(userId: number, limit: number): Promise<ActivityLog[]> {
-    return await db.select()
-      .from(activityLogs)
-      .where(eq(activityLogs.userId, userId))
-      .orderBy(activityLogs.timestamp)
-      .limit(limit);
-  }
-
-  async createLog(insertLog: InsertActivityLog): Promise<ActivityLog> {
-    const [log] = await db
-      .insert(activityLogs)
-      .values(insertLog)
-      .returning();
-    return log;
-  }
-
-  async getUnsentLogs(userId: number): Promise<ActivityLog[]> {
-    return await db.select()
-      .from(activityLogs)
-      .where(eq(activityLogs.userId, userId) && eq(activityLogs.sent, false));
-  }
-
-  async markLogAsSent(id: number): Promise<ActivityLog> {
-    const [updated] = await db
-      .update(activityLogs)
-      .set({ sent: true })
-      .where(eq(activityLogs.id, id))
-      .returning();
-    return updated;
-  }
-
-  async getSettings(userId: number): Promise<Settings | undefined> {
-    const [setting] = await db.select()
-      .from(settings)
-      .where(eq(settings.userId, userId));
-    return setting;
-  }
-
-  async updateSettings(userId: number, data: Partial<InsertSettings>): Promise<Settings> {
-    const existingSettings = await this.getSettings(userId);
-    
-    if (existingSettings) {
-      const [updated] = await db
-        .update(settings)
-        .set(data)
-        .where(eq(settings.id, existingSettings.id))
-        .returning();
-      return updated;
-    } else {
-      const [newSettings] = await db
-        .insert(settings)
-        .values({ ...data, userId } as InsertSettings)
-        .returning();
-      return newSettings;
-    }
-  }
-
-  async getAnalytics(userId: number): Promise<Analytics | undefined> {
-    const [analytic] = await db.select()
-      .from(analytics)
-      .where(eq(analytics.userId, userId));
-    return analytic;
-  }
-
-  async updateAnalytics(userId: number, data: Partial<InsertAnalytics>): Promise<Analytics> {
-    const existingAnalytics = await this.getAnalytics(userId);
-    
-    if (existingAnalytics) {
-      const [updated] = await db
-        .update(analytics)
-        .set(data)
-        .where(eq(analytics.id, existingAnalytics.id))
-        .returning();
-      return updated;
-    } else {
-      const [newAnalytics] = await db
-        .insert(analytics)
-        .values({ ...data, userId } as InsertAnalytics)
-        .returning();
-      return newAnalytics;
-    }
-  }
-
-  async startSession(userId: number): Promise<Session> {
-    const [session] = await db
-      .insert(sessions)
-      .values({ 
-        userId,
-        startTime: new Date(),
-        endTime: null
-      } as InsertSession)
-      .returning();
-    return session;
-  }
-
-  async endSession(id: number): Promise<Session> {
-    const [updated] = await db
-      .update(sessions)
-      .set({ endTime: new Date() })
-      .where(eq(sessions.id, id))
-      .returning();
-    return updated;
-  }
-
-  async getCurrentSession(userId: number): Promise<Session | undefined> {
-    const [session] = await db.select()
-      .from(sessions)
-      .where(eq(sessions.userId, userId) && eq(sessions.endTime, null));
-    return session;
-  }
-}
-
-export const storage = new DatabaseStorage();
+export const storage = new MemStorage();

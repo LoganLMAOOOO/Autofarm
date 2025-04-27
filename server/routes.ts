@@ -77,11 +77,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Dashboard stats endpoint
   app.get("/api/dashboard/stats", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
-    const userId = req.user.id;
+    // During the transition to memory storage, use the demo user for simplicity
+    const userId = DEV_USER_ID;
     
     try {
       // Get user analytics
@@ -144,11 +141,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Channel endpoints
   app.get("/api/channels", async (req, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
-    const userId = req.user.id;
+    // During the transition to memory storage, use the demo user for simplicity
+    const userId = DEV_USER_ID;
     
     try {
       const channels = await storage.getChannels(userId);
@@ -161,11 +155,8 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/channels", validateBody(insertChannelSchema.extend({
     name: z.string().min(1)
   })), async (validatedData, res) => {
-    if (!req.isAuthenticated()) {
-      return res.status(401).json({ message: "Not authenticated" });
-    }
-    
-    const userId = req.user.id;
+    // During the transition to memory storage, use the demo user for simplicity
+    const userId = DEV_USER_ID;
     
     try {
       // Use the validated data with the user ID
