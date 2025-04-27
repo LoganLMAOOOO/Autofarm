@@ -1,0 +1,72 @@
+### **Ultimate Twitch Autofarm Dashboard Prompt**  
+
+**Project Goal:**  
+Create a **high-end Twitch Autofarm Dashboard** with:  
+✔ **Auto-farming** (Twitch points, watch time, channel loyalty).  
+✔ **AI Prediction Betting** (smart odds analysis, risk management).  
+✔ **Fully responsive UI** (flawless on **mobile & desktop**).  
+✔ **Premium animations & design** (GSAP/Framer Motion, glassmorphism, cyberpunk/neon aesthetic).  
+✔ **Real-time Discord logging** via webhook (activity tracking, errors, predictions).  
+
+---  
+
+### **Technical Requirements:**  
+
+#### **1. Frontend (UI/UX)**  
+- **Framework:** React.js + Tailwind CSS (or Material-UI for premium components).  
+- **Animations:**  
+  - **Micro-interactions:** GSAP/Framer Motion for hover effects, loading transitions.  
+  - **Lottie** for high-quality animated icons.  
+- **Theme:**  
+  - Dark mode with **gradient accents, glass panels, or cyberpunk neon**.  
+  - **Mobile-first** design with intuitive touch controls.  
+
+#### **2. Backend (Automation & Logic)**  
+- **Twitch Automation:**  
+  - Use **Playwright/Puppeteer** (headless) or `tmi.js` for chat interaction.  
+  - **Stealth mode** (randomized delays, human-like behavior).  
+- **Prediction AI:**  
+  - Weighted probability model (analyzes past outcomes, streamer trends).  
+  - Auto-bet with **risk thresholds** (e.g., "Only bet if win probability > 65%").  
+
+#### **3. Discord Webhook Integration**  
+- **Log ALL events** to:  
+  ```  
+  https://discord.com/api/webhooks/1366060653726404739/tDHOL9pRRmFrYXPUQCfg5Itu9mTWZsi0ROtyLEi7yn8tokyQXtzNcMBTslMClV47tD61  
+  ```  
+- **Customize Webhook:**  
+  - **Name:** `Twitch Farm Pro`  
+  - **Profile Image:** Use a Twitch-themed icon (e.g., purple/pixel art).  
+- **Logged Events:**  
+  - Farmed points (hourly/daily totals).  
+  - Prediction bets (amount, outcome, profit/loss).  
+  - Errors (reconnections, failed bets).  
+  - Session start/end.  
+
+#### **4. Quality Assurance**  
+- **Zero Bugs on Delivery:** Tested for:  
+  - Memory leaks, animation lag.  
+  - Webhook reliability (no missing logs).  
+- **Replit-Compatible:** Avoid Puppeteer conflicts (use `puppeteer-core` + external browser).  
+
+---  
+
+### **Final Notes:**  
+- **No placeholders**—every feature must work **first try**.  
+- **Example Log Format:**  
+  ```json  
+  {  
+    "event": "Prediction Bet",  
+    "channel": "xQc",  
+    "amount": 500,  
+    "outcome": "WIN",  
+    "profit": 750  
+  }  
+  ```  
+
+---  
+
+### **Why This Works?**  
+1. **Exhaustive Detail** – Leaves no room for misinterpretation.  
+2. **Discord Logging SOP** – Specifies name, avatar, and data structure.  
+3. **Anti-Detection** – Emphasizes stealth in automation.  
