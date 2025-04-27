@@ -196,10 +196,9 @@ export class DiscordService {
   private startLogProcessing(): void {
     // Process logs every minute
     setInterval(async () => {
-      // Get all users
-      const users = Array.from(new Set(
-        Array.from(storage['users'].values()).map(user => user.id)
-      ));
+      // Process logs for the demo user (ID 1) for now
+      // In a full production app, we would get all user IDs from the database
+      const users = [1];
       
       // Process logs for each user
       for (const userId of users) {

@@ -22,7 +22,7 @@ export const channels = pgTable("channels", {
   name: text("name").notNull(),
   autoFarm: boolean("auto_farm").default(true).notNull(),
   collectBonuses: boolean("collect_bonuses").default(true).notNull(),
-  watchHours: integer("watch_hours").default(0).notNull(),
+  watchHours: numeric("watch_hours").default(0).notNull(),
   pointsEarned: integer("points_earned").default(0).notNull(),
   status: text("status").default("Offline").notNull(), // Active, Paused, Offline
   lastActive: timestamp("last_active"),

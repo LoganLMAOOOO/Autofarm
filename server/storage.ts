@@ -457,7 +457,7 @@ export class DatabaseStorage implements IStorage {
   async getActiveChannels(userId: number): Promise<Channel[]> {
     return await db.select()
       .from(channels)
-      .where(eq(channels.userId, userId) && eq(channels.active, true));
+      .where(eq(channels.userId, userId) && eq(channels.status, "Active"));
   }
 
   async getPredictions(userId: number): Promise<Prediction[]> {
@@ -493,7 +493,7 @@ export class DatabaseStorage implements IStorage {
     return await db.select()
       .from(predictions)
       .where(eq(predictions.userId, userId))
-      .orderBy(predictions.createdAt)
+      .orderBy(predictions.timestamp)
       .limit(limit);
   }
 
