@@ -3,8 +3,8 @@ services:
     name: twitch-autofarm-dashboard
     env: node
     plan: free
-    buildCommand: npm install && npm run build
-    startCommand: npm start
+    buildCommand: npm install && npm run build && chmod +x ./start.sh
+    startCommand: ./start.sh
     healthCheckPath: /api/health
     envVars:
       - key: NODE_ENV

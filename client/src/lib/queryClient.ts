@@ -7,12 +7,21 @@ async function throwIfResNotOk(res: Response) {
   }
 }
 
+// Get the API base URL depending on environment
+const getApiBaseUrl = () => {
+  // In production with Render.com deployment, API_BASE_URL can be set as an env variable
+  // and injected at build time, otherwise use relative URLs for local development
+  return import.meta.env.VITE_API_BASE_URL || '';
+};
+
 export async function apiRequest(
   method: string,
   url: string,
   data?: unknown | undefined,
 ): Promise<Response> {
-  const res = await fetch(url, {
+  const apiUrl = getApiBaseUrl() + url;
+  
+  const res = await fetch(apiUrl, {
     method,
     headers: data ? { "Content-Type": "application/json" } : {},
     body: data ? JSON.stringify(data) : undefined,
@@ -29,7 +38,8 @@ export const getQueryFn: <T>(options: {
 }) => QueryFunction<T> =
   ({ on401: unauthorizedBehavior }) =>
   async ({ queryKey }) => {
-    const res = await fetch(queryKey[0] as string, {
+    const apiUrl = getApiBaseUrl() + (queryKey[0] as string);
+    const res = await fetch(apiUrl, {
       credentials: "include",
     });
 
