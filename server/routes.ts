@@ -77,18 +77,24 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Dashboard stats endpoint
   app.get("/api/dashboard/stats", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    
+    const userId = req.user.id;
+    
     try {
       // Get user analytics
-      const analytics = await storage.getAnalytics(DEV_USER_ID);
+      const analytics = await storage.getAnalytics(userId);
       
       // Get channels
-      const channels = await storage.getChannels(DEV_USER_ID);
+      const channels = await storage.getChannels(userId);
       
       // Get recent logs
-      const recentLogs = await storage.getRecentLogs(DEV_USER_ID, 5);
+      const recentLogs = await storage.getRecentLogs(userId, 5);
       
       // Get current session for uptime
-      const currentSession = await storage.getCurrentSession(DEV_USER_ID);
+      const currentSession = await storage.getCurrentSession(userId);
       let uptime = "0h 0m";
       
       if (currentSession) {
@@ -138,8 +144,14 @@ export async function registerRoutes(app: Express): Promise<Server> {
   
   // Channel endpoints
   app.get("/api/channels", async (req, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    
+    const userId = req.user.id;
+    
     try {
-      const channels = await storage.getChannels(DEV_USER_ID);
+      const channels = await storage.getChannels(userId);
       res.json(channels);
     } catch (error) {
       res.status(500).json({ message: "Failed to fetch channels" });
@@ -149,11 +161,17 @@ export async function registerRoutes(app: Express): Promise<Server> {
   app.post("/api/channels", validateBody(insertChannelSchema.extend({
     name: z.string().min(1)
   })), async (validatedData, res) => {
+    if (!req.isAuthenticated()) {
+      return res.status(401).json({ message: "Not authenticated" });
+    }
+    
+    const userId = req.user.id;
+    
     try {
       // Use the validated data with the user ID
       const channelData = {
         ...validatedData,
-        userId: DEV_USER_ID
+        userId
       };
       
       const channel = await twitchService.addChannel(
