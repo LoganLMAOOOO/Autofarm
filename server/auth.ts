@@ -36,7 +36,9 @@ export function setupAuth(app: Express) {
     store: storage.sessionStore,
     cookie: {
       secure: process.env.NODE_ENV === 'production',
+      sameSite: process.env.NODE_ENV === 'production' ? 'none' : 'lax',
       maxAge: 1000 * 60 * 60 * 24 * 7, // 1 week
+      domain: process.env.COOKIE_DOMAIN // Will use app domain on Render.com if provided
     }
   };
 
